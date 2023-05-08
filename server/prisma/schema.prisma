@@ -1,0 +1,46 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Comment {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  author     String 
+  content    String
+  createdAt  DateTime  @default(now())
+  likes      Int       @default(0)
+  Feedback   Feedback? @relation(fields: [feedbackId], references: [id])
+  feedbackId String?   @db.ObjectId
+}
+
+model Feedback {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  content   String
+  createdAt DateTime  @default(now())
+  upVotes   Vote[]
+  downVotes Vote[]
+  comments  Comment[]
+  User      User?     @relation(fields: [userId], references: [id])
+  userId    String?   @db.ObjectId
+}
+
+type Vote {
+  author     String
+  createdAt  DateTime @default(now())
+  feedbackId String
+}
+
+model User {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  email     String     @unique
+  password  String
+  feedbacks Feedback[]
+}
