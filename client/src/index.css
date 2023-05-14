@@ -28,7 +28,7 @@
 }
 
 .button:hover {
-  background-color: hsl(204 100% 32%);
+  background-color: lightgreen;
 }
 
 .button[aria-disabled="true"] {
@@ -93,7 +93,7 @@
 }
 
 .menu-item[data-active-item] {
-  background-color: hsl(204 100% 40%);
+  background-color: theme("colors.tertiary");
   color: hsl(204 20% 100%);
 }
 

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import type { MotionProps, Variants } from "framer-motion";
 import { Menu, MenuItem } from "./DropdownMenu";
-import { Avatar } from "@mui/material";
 import api from "../../api";
 import useAuth from "../../hooks/useAuth";
 
@@ -71,10 +70,17 @@ export default function Dropdown() {
       <MenuItem {...item} href="/dashboard">
         Dashboard
       </MenuItem>
-      <MenuItem {...item} href="/feedbacks">
-        My Feedbacks
+      <MenuItem {...item} href="/projects">
+        Projects
       </MenuItem>
-      <MenuItem {...item} onClick={handleLogout}>
+      <MenuItem {...item} href="/settings">
+        Settings
+      </MenuItem>
+      <MenuItem
+        {...item}
+        onClick={handleLogout}
+        className="border-2 border-primary rounded-md py-1 mt-2"
+      >
         Logout
       </MenuItem>
     </Menu>

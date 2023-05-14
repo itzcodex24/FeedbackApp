@@ -8,9 +8,10 @@ import http from "http";
 require("dotenv").config();
 
 // routes
-import { feedbackRoute, apiRoute, authRoutes } from "./routes";
+import { feedbackRoute, apiRoute, authRoutes, projectRoute } from "./routes";
 import cookieParser from "cookie-parser";
 import connectionsHandler from "./sockets/connections";
+import protectedRoute from "./middleware/protectedRoute";
 
 const app = express();
 
@@ -40,9 +41,14 @@ const io = new Server(server, {
 
 connectionsHandler(io);
 
+app.post("/", protectedRoute, (req, res) => {
+  res.status(200).json({ data: "👋" });
+});
+
 app.use("/api/", apiRoute);
 app.use("/feedback/", feedbackRoute);
 app.use("/auth/", authRoutes);
+app.use("/project/", projectRoute);
 
 app.use((req, res, next) => {
   next(createError.NotFound());

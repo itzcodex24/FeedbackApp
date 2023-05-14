@@ -1,35 +1,26 @@
 import React, { useEffect, useState } from "react";
 import { motion, useAnimation } from "framer-motion";
-// import { socket } from "../socket";
+import { socket } from "../socket";
+import useAuth from "../hooks/useAuth";
+import { usePageTitle } from "../hooks";
+import { MotionPage } from "../components";
 
 const Home: React.FC = () => {
   const [connected, setConnected] = useState(1);
+  usePageTitle("Home");
 
   useEffect(() => {
-    // socket.on("getconnected", (data) => {
-    //   setConnected(data.connected);
-    // });
+    socket.on("getconnected", (data) => {
+      console.log(data);
+      setConnected(data.connected);
+    });
   }, []);
 
   const startWave = useAnimation();
-  const emojyAnimation = useAnimation();
-
-  const animationComplete = () => {
-    console.log("calling");
-    setTimeout(() => {
-      emojyAnimation.start("rotateAndScale");
-    }, 1000);
-  };
 
   return (
     <>
-      <motion.div
-        initial={{ width: 0 }}
-        animate={{ width: "100%" }}
-        exit={{ x: "100%", opacity: 0 }}
-        className="w-full h-screen flex items-center bg-secondary flex-col justify-around"
-        onAnimationComplete={() => startWave.start("visible")}
-      >
+      <MotionPage className="w-full h-screen flex items-center bg-secondary flex-col justify-around">
         <motion.div
           className="flex items-center justify-center gap-x-2"
           animate={startWave}
@@ -37,6 +28,7 @@ const Home: React.FC = () => {
         >
           <motion.h1
             className="text-white text-3xl"
+            animate="visible"
             variants={{
               hidden: {
                 opacity: 0,
@@ -54,6 +46,7 @@ const Home: React.FC = () => {
           </motion.h1>
           <motion.h1
             className="text-3xl"
+            animate="visible"
             variants={{
               hidden: {
                 opacity: 0,
@@ -73,10 +66,15 @@ const Home: React.FC = () => {
             👋
           </motion.h1>
         </motion.div>
-        <motion.h1 className="text-white opacity-50 text-md">
+        <motion.h1
+          className="text-white opacity-50 text-md"
+          animate={{ opacity: 0.5 }}
+          initial={{ opacity: 0 }}
+          transition={{ delay: 1 }}
+        >
           There are <b>{connected}</b> people connected the website
         </motion.h1>
-      </motion.div>
+      </MotionPage>
     </>
   );
 };

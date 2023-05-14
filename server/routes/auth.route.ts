@@ -1,11 +1,42 @@
 import express from "express";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import validateToken from "../middleware/validateTokenHandler";
+import jwt, { JwtPayload } from "jsonwebtoken";
+import { createAccessToken, remove } from "../helpers";
+import protectedRoute from "../middleware/protectedRoute";
+import jwtDecode, { InvalidTokenError } from "jwt-decode";
 
 const router = express.Router();
 const prisma = new PrismaClient();
+
+router.get("/users", async (req, res, next) => {
+  try {
+    let returnedUsers: any[] = [];
+
+    const users = await prisma.user.findMany({});
+
+    users.length > 0 &&
+      users.map((u) => {
+        returnedUsers.push(remove(u, ["password"]));
+      });
+    res.status(200).send(returnedUsers);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post("/refreshToken", async (req, res, next) => {
+  try {
+    const { refreshToken } = req.body;
+    if (!refreshToken) {
+      return res.status(400).send({ message: "Refresh token is required" });
+    }
+  } catch (err) {
+    next(err);
+  }
+});
+
+const maxAge = 3 * 24 * 60 * 60;
 
 router.post("/register", async (req, res, next) => {
   try {
@@ -20,12 +51,25 @@ router.post("/register", async (req, res, next) => {
     prisma.user
       .create({
         data: {
-          email,
           password: hashedPassword,
+          email,
+          username: "",
         },
       })
       .then((user) => {
-        res.status(200).send({ message: "User created successfully" });
+        const io = req.app.get("io");
+        io.to("register").emit("newRegister", {
+          message: "New user registered",
+          user: remove(user, ["password"]),
+        });
+
+        const accessToken = createAccessToken(user.id, maxAge);
+        res
+          .cookie("token", accessToken, {
+            httpOnly: true,
+            maxAge: maxAge * 1000,
+          })
+          .send({ message: "User successfully registered !", userId: user.id });
       })
       .catch((err) => {
         res.status(400).send({ message: "User already exists" });
@@ -35,31 +79,82 @@ router.post("/register", async (req, res, next) => {
   }
 });
 
-router.get("/logout", validateToken, (req, res) => {
+router.get("/logout", protectedRoute, (req, res) => {
   res.clearCookie("token");
   res.status(200).send({ message: "Logged out" });
 });
 
-router.get("/user", validateToken, async (req: any, res, next) => {
-  try {
-    prisma.user
-      .findUnique({
+router.post("/reset", protectedRoute, async (req, res) => {
+  console.log(req.body);
+  const { id, currentPassword, newPassword, confirmNewPassword } = req.body;
+  if (!id || !currentPassword || !newPassword || !confirmNewPassword) {
+    return res.status(400).send({ message: "All fields are required" });
+  }
+
+  if (newPassword !== confirmNewPassword) {
+    return res.status(400).send({ message: "Passwords do not match" });
+  }
+
+  const user = await prisma.user.findUnique({
+    where: {
+      id,
+    },
+  });
+  if (user) {
+    const isPasswordValid = bcrypt.compareSync(currentPassword, user.password);
+    if (isPasswordValid) {
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      await prisma.user.update({
         where: {
-          id: req.user.user.id,
+          id,
         },
-      })
-      .then((user) => {
-        res.status(200).send({ email: user?.email, id: user?.id });
-      })
-      .catch((err) => {
-        res.status(400).send({ message: "User does not exist" });
+        data: {
+          password: hashedPassword,
+        },
       });
-  } catch (err) {
-    next(err);
+      return res.status(200).send({ message: "Password updated" });
+    } else {
+      return res.status(400).send({ message: "Wrong password" });
+    }
+  } else {
+    return res.status(400).send({ message: "User does not exists" });
   }
 });
 
-router.get("/", validateToken, async (req: any, res, next) => {
+router.get("/user", protectedRoute, async (req, res, next) => {
+  const token = req.cookies.token;
+  if (token) {
+    const decoded = jwtDecode<JwtPayload>(token);
+    if (decoded instanceof InvalidTokenError) {
+      return res
+        .status(400)
+        .send({ message: "Invalid token", status: "UNAUTHORIZED" });
+    }
+    const user = await prisma.user.findUnique({
+      where: {
+        id: decoded.userId,
+      },
+    });
+    if (user) {
+      return res.status(200).send({
+        email: user.email,
+        id: user.id,
+        role: user.role,
+        username: user.username,
+        status: "AUTHORIZED",
+      });
+    }
+    return res
+      .status(400)
+      .send({ message: "User does not exists", status: "UNAUTHORIZED" });
+  } else {
+    res
+      .status(400)
+      .send({ message: "User is not authenticated", status: "UNAUTHORIZED" });
+  }
+});
+
+router.get("/", protectedRoute, async (req: any, res, next) => {
   const userData = req.user.user;
   try {
     const user = await prisma.user.findUnique({
@@ -83,11 +178,13 @@ router.post("/login", async (req, res, next) => {
 
     const user = await prisma.user.findUnique({
       where: {
-        email,
+        email: email,
       },
     });
     if (!user) {
-      return res.status(400).send({ message: "User does not exist" });
+      return res
+        .status(400)
+        .send({ message: "Email or password are incorrect" });
     }
 
     const passwordMatch = bcrypt.compareSync(
@@ -98,27 +195,14 @@ router.post("/login", async (req, res, next) => {
       res.status(400).send({ message: "Password is incorrect" });
     } else {
       // USER LOGGED IN SUCCESSFULLY
-
-      const accessToken = jwt.sign(
-        {
-          user: {
-            id: user?.id,
-          },
-        },
-        process.env.ACCESS_TOKEN_SECRET as string,
-        { expiresIn: "15m" }
-      );
+      const token = createAccessToken(user.id, maxAge);
       res
-        .cookie("token", accessToken, {
-          httpOnly: false,
-          secure: true,
-          sameSite: "none",
+        .cookie("token", token, {
+          httpOnly: true,
+          maxAge: maxAge * 1000,
         })
         .status(200)
-        .send({
-          message: "User logged in successfully",
-          accessToken,
-        });
+        .json({ user: user.id });
     }
   } catch (err) {
     next(err);

@@ -1,17 +1,15 @@
-import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import api from "../api";
+import React, { useState } from "react";
+import { usePageTitle } from "../hooks";
+import { MotionPage } from "../components";
 
 const Dashboard: React.FC = () => {
   const [feedbacks, setFeedbacks] = useState<null | any[]>(null);
+  usePageTitle("Dashboard");
 
   return (
-    <motion.div
-      initial={{ width: 0 }}
-      animate={{ width: "100%" }}
-      exit={{ x: "100%", opacity: 0 }}
-      className="w-full h-screen flex items-center bg-secondary flex-col justify-around"
-    ></motion.div>
+    <MotionPage className="w-full h-screen flex items-center bg-secondary flex-col justify-around">
+      <h1>Dashboard</h1>
+    </MotionPage>
   );
 };
 

@@ -55,7 +55,7 @@ export const Menu = React.forwardRef<HTMLDivElement, MenuProps>(
               // We'll use this data attribute to style the transform-origin
               // property based on the menu's placement. See style.css.
               data-placement={currentPlacement}
-              className="menu"
+              className="menu !bg-secondary !text-primary"
               as={motion.div}
               initial={initial}
               exit={exit}
@@ -88,7 +88,7 @@ export const MenuItem = React.forwardRef<HTMLDivElement, MenuItemProps>(
         <Ariakit.MenuItem
           as={motion.div}
           ref={ref}
-          className="menu-item"
+          className=""
           children={label}
           animate={animate}
           variants={variants}

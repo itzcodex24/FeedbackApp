@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { AnimatePresence, motion, stagger, useAnimate } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Dropdown from "../components/Dropdown/Dropdown";
 import useAuth from "../hooks/useAuth";
@@ -13,14 +13,15 @@ const links = [
   },
   { name: "Dashboard", requiresAuth: true, path: "/dashboard" },
   {
-    name: "My Feedbacks",
+    name: "Projects",
     requiresAuth: true,
-    path: "/feedbacks",
+    path: "/projects",
   },
 ];
 
 const Navbar = () => {
   const [currentLink, setCurrentLink] = React.useState(links[0]);
+
   const navigate = useNavigate();
 
   const { session, status } = useAuth();
@@ -31,25 +32,37 @@ const Navbar = () => {
     if (link) setCurrentLink(link);
   }, [location]);
 
+  if (status == "loading") return null;
+
   return (
     <>
-      {status == "loaded" && (
-        <AnimatePresence initial={false} mode="wait">
-          <div className="w-full flex bg-tertiary h-16 items-center text-primary font-lato justify-center">
-            <div className="w-3/4 h-full flex justify-between items-center">
-              <div className="flex items-center justify-start md:justify-center flex-1 flex-grow">
-                <motion.img
-                  initial={{ opacity: 0 }}
-                  onClick={() => navigate("/")}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.2 }}
-                  whileHover={{ scale: 1.1 }}
-                  src="images/logo.svg"
-                  className="hover:cursor-pointer w-10 md:mr-10"
-                />
-                <div className="justify-center items-center hidden md:flex">
-                  {links.map((link, i) => (
-                    <div key={i}>
+      <AnimatePresence mode="wait">
+        <div className="w-full flex bg-tertiary h-16 items-center text-primary font-lato justify-center">
+          <div className="w-3/4 h-full flex justify-between items-center">
+            <div className="flex items-center justify-start md:justify-center flex-1 flex-grow">
+              <motion.img
+                initial={{ opacity: 0 }}
+                onClick={() => navigate("/")}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                whileHover={{ scale: 1.1 }}
+                src="/images/logo.svg"
+                className="hover:cursor-pointer w-10 md:mr-10"
+              />
+              <motion.div
+                className="justify-center items-center hidden md:flex"
+                variants={{
+                  hidden: {
+                    opacity: 0,
+                  },
+                  visible: {
+                    opacity: 1,
+                  },
+                }}
+              >
+                {links.map((link, i) => {
+                  return link.requiresAuth && !session ? null : (
+                    <motion.div key={i}>
                       <Link
                         to={link.path}
                         className={`${
@@ -70,25 +83,25 @@ const Navbar = () => {
                           {link.name}
                         </span>
                       </Link>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              {status == "loaded" && session ? (
-                <motion.div className="flex justify-end items-center flex-1 flex-grow">
-                  <Dropdown />
-                </motion.div>
-              ) : (
-                <motion.div className="flex justify-end items-center flex-1 flex-grow ">
-                  <Button onClick={() => navigate("/login")} className="">
-                    Login
-                  </Button>
-                </motion.div>
-              )}
+                    </motion.div>
+                  );
+                })}
+              </motion.div>
             </div>
+            {status == "loaded" && session ? (
+              <motion.div className="flex md:justify-center items-center flex-1 flex-grow justify-end">
+                <Dropdown />
+              </motion.div>
+            ) : (
+              <motion.div className="flex justify-self-end items-center flex-1 flex-grow">
+                <Button onClick={() => navigate("/login")} className="">
+                  Login
+                </Button>
+              </motion.div>
+            )}
           </div>
-        </AnimatePresence>
-      )}
+        </div>
+      </AnimatePresence>
     </>
   );
 };

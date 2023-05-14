@@ -1,10 +1,13 @@
 import express from "express";
 import { PrismaClient } from "@prisma/client";
-import validateToken from "../middleware/validateTokenHandler";
+import protectedRoute from "../middleware/protectedRoute";
+import jwtDecode from "jwt-decode";
+import { JwtPayload } from "jsonwebtoken";
+import rateLimiter from "../middleware/rateLimiter";
 const router = express.Router();
 const prisma = new PrismaClient();
 
-router.get("/", validateToken, async (req, res, next) => {
+router.get("/", protectedRoute, async (req, res, next) => {
   try {
     const feedbacks = await prisma.feedback.findMany({});
     res.send({ feedbacks });
@@ -13,37 +16,51 @@ router.get("/", validateToken, async (req, res, next) => {
   }
 });
 
-router.get("/getUser", validateToken, async (req: any, res, next) => {
+router.post("/getUserFeedbacks", async (req, res, next) => {
   try {
-    const user = await prisma.user.findUnique({
+    const feedbacks = await prisma.feedback.findMany({
       where: {
-        id: req.user.id,
+        User: {
+          id: req.body.id,
+        },
       },
     });
-    if (user) {
-      res.status(200).send({ email: user.email });
-    }
+    res.status(200).send({ feedbacks });
   } catch (err) {
     next(err);
   }
 });
 
-router.post("/create", validateToken, async (req, res, next) => {
+const timeouts = new Set<string>();
+
+router.post("/create", protectedRoute, rateLimiter, async (req, res, next) => {
   try {
-    const { name, author, content } = req.body;
-    if (!name || !author || !content)
+    const { name, content } = req.body;
+    if (!name || !content)
       return res.status(400).send({ message: "All fields are required" });
 
-    res.status(200).send({ message: "Ok" });
+    const decoded = jwtDecode<JwtPayload>(req.cookies.token);
+    const user = await prisma.user.findUnique({
+      where: {
+        id: decoded.userId,
+      },
+    });
+    const feedback = await prisma.feedback.create({
+      data: {
+        name,
+        content,
+        User: {
+          connect: {
+            id: user?.id,
+          },
+        },
+      },
+    });
+    timeouts.add(decoded.userId);
+    res.status(200).send({ feedback: feedback.id });
   } catch (error) {
     next(error);
   }
-});
-
-router.get("/:id", (req, res) => {
-  // get the id param
-  const id = req.params.id;
-  res.send({ message: "Feedback route " + id });
 });
 
 export default router;

@@ -28,7 +28,7 @@ const AuthProvider: React.FC<Props> = ({ children }) => {
             status: "loaded",
             session: null,
           });
-          reject(err);
+          reject("Not logged in");
         });
     });
   }
