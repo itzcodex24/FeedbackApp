@@ -5,6 +5,7 @@ import { z } from "zod";
 import { motion } from "framer-motion";
 import { useAuth } from "../hooks";
 import api from "../api";
+import { useNavigate } from "react-router-dom";
 
 const CreateFeedback: React.FC = () => {
   const { session } = useAuth();
@@ -25,6 +26,8 @@ const CreateFeedback: React.FC = () => {
     ),
   });
 
+  const navigate = useNavigate();
+
   const onSubmit = async (data: any) => {
     setLoading(true);
     try {
@@ -34,7 +37,7 @@ const CreateFeedback: React.FC = () => {
       });
       console.log(res.data);
 
-      setLoading(false);
+      navigate(`/projects/`);
     } catch (error: any) {
       setLoading(false);
       if (error.response.status === 429) {
@@ -87,7 +90,7 @@ const CreateFeedback: React.FC = () => {
           </div>
           <div>
             <label htmlFor="name" className="text-sm">
-              Project Name
+              Project Name <span className="text-red-400">*</span>
             </label>
             <input
               id="name"
@@ -100,13 +103,14 @@ const CreateFeedback: React.FC = () => {
           </div>
           <div>
             <label htmlFor="feedback" className="text-sm">
-              Description
+              Description <span className="text-red-400">*</span>
             </label>
             <textarea
               id="feedback"
               {...register("content", {
                 required: true,
               })}
+              placeholder="What's your project about?"
               rows={3}
               className="w-full p-3 rounded border-primary bg-secondary border focus:outline-none"
             ></textarea>

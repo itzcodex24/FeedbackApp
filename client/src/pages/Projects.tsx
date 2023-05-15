@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { motion } from "framer-motion";
 import useAuth from "../hooks/useAuth";
 import { usePageTitle } from "../hooks";
 import { Link } from "react-router-dom";
@@ -25,8 +23,8 @@ const MyFeedbacks: React.FC = () => {
       });
   }, []);
   return (
-    <MotionPage className="w-full h-screen flex bg-secondary flex-col ">
-      <div className="w-full px-4 flex items-center flex-col h-full">
+    <MotionPage className="w-full flex bg-secondary flex-col ">
+      <div className="w-full px-4 flex items-center flex-col mb-10 ">
         <div className="w-full flex items-center justify-center mt-2 mb-10">
           <Link
             to="/projects/create"
@@ -35,22 +33,13 @@ const MyFeedbacks: React.FC = () => {
             Create
           </Link>
         </div>
-        <div
-          className={`flex flex-col w-full justify-start ${
-            (feedbacks?.length && feedbacks?.length == 0) || "h-full "
-          }`}
-        >
+        <div className={`flex flex-col w-full justify-start `}>
           {feedbacks == null ? (
             <h1 className="text-2xl text-primary font-bold">Loading</h1>
           ) : feedbacks && feedbacks?.length > 0 ? (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 w-full">
               {feedbacks?.map((f) => (
-                <Project
-                  name={f.name}
-                  description={f.description}
-                  id={f.id}
-                  key={f.id}
-                />
+                <Project project={f} key={f.id} />
               ))}
             </div>
           ) : (

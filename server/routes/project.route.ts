@@ -17,6 +17,7 @@ router.get("/", protectedRoute, async (req, res, next) => {
         userId: decodedToken.userId,
       },
     });
+
     res.status(200).json(projects);
   } catch (error) {
     next(error);

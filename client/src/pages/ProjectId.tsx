@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import api from "../api";
 
 const ProjectId: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [project, setProject] = useState<null | any>(null);
   const [error, setError] = useState<null | string>(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     api
@@ -16,10 +18,23 @@ const ProjectId: React.FC = () => {
       })
       .catch((err) => {
         console.log("error");
+        navigate("/projects");
       });
   }, []);
 
-  return <div>{JSON.stringify(project)}</div>;
+  const handleSubmit = () => {
+    api.post("/feedback/create", {
+      content: "Hello world",
+      projectId: id,
+    });
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center bg-secondary w-full h-screen ">
+      <h1>{JSON.stringify(project)}</h1>
+      <button onClick={handleSubmit}>Submit feedback</button>
+    </div>
+  );
 };
 
 export default ProjectId;
