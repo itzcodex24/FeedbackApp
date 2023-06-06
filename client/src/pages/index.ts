@@ -1,7 +1,6 @@
 import Home from "./Home";
 import Dashboard from "./Dashboard";
 import Login from "./Login";
-import FeedbackId from "./FeedbackId";
 import Register from "./Register";
 import NotFound from "./NotFound";
 import Settings from "./Settings";
@@ -17,7 +16,6 @@ export {
   Home,
   Dashboard,
   Login,
-  FeedbackId,
   AdminUsers,
   Register,
   NotFound,

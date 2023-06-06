@@ -8,7 +8,7 @@ import http from "http";
 require("dotenv").config();
 
 // routes
-import { feedbackRoute, apiRoute, authRoutes, projectRoute } from "./routes";
+import { apiRoute, authRoutes, projectRoute } from "./routes";
 import cookieParser from "cookie-parser";
 import connectionsHandler from "./sockets/connections";
 import protectedRoute from "./middleware/protectedRoute";
@@ -46,7 +46,6 @@ app.post("/", protectedRoute, (req, res) => {
 });
 
 app.use("/api/", apiRoute);
-app.use("/feedback/", feedbackRoute);
 app.use("/auth/", authRoutes);
 app.use("/project/", projectRoute);
 

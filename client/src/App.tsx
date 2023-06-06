@@ -11,7 +11,6 @@ import {
   AdminUsers,
   Dashboard,
   Projects,
-  FeedbackId,
   NotFound,
   Settings,
   CreateProject,
@@ -65,7 +64,6 @@ function App() {
           <Route path="*" element={<NotFound />} />
           <Route path="/dashboard/" element={<Dashboard />} />
           <Route path="/login/" element={<Login />} />
-          <Route path="/feedback/:id" element={<FeedbackId />} />
           <Route
             path="/projects/create"
             element={

@@ -10,14 +10,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Comment {
-  id         String    @id @default(auto()) @map("_id") @db.ObjectId
-  author     String
-  content    String
-  createdAt  DateTime  @default(now())
-  likes      Int       @default(0)
-  Feedback   Feedback? @relation(fields: [feedbackId], references: [id])
-  feedbackId String?   @db.ObjectId
+type Comment {
+  author    String
+  content   String
+  createdAt DateTime @default(now())
+  likes     Int
+  dislikes  Int
 }
 
 model Project {
@@ -30,30 +28,27 @@ model Project {
   userId      String     @db.ObjectId
 }
 
-model Feedback {
-  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+type Upvote {
+  author String
+}
+
+type Downvote {
+  author String
+}
+
+type Feedback {
   name      String
+  author    String
   content   String
-  createdAt DateTime  @default(now())
-  upVotes   Vote[]
-  downVotes Vote[]
   comments  Comment[]
-  User      User?     @relation(fields: [userId], references: [id])
-  userId    String?   @db.ObjectId
-  Project   Project?  @relation(fields: [projectId], references: [id])
-  projectId String?   @db.ObjectId
+  upVotes   Upvote[]
+  downVotes Downvote[]
+  createdAt DateTime   @default(now())
 }
 
 type Vote {
   userId    String
   createdAt DateTime @default(now())
-}
-
-model RefreshTokens {
-  id     String  @id @default(auto()) @map("_id") @db.ObjectId
-  owner  String  @db.ObjectId
-  User   User?   @relation(fields: [userId], references: [id])
-  userId String? @db.ObjectId
 }
 
 enum Roles {
@@ -62,12 +57,11 @@ enum Roles {
 }
 
 model User {
-  id            String          @id @default(auto()) @map("_id") @db.ObjectId
-  email         String          @unique
-  password      String
-  feedbacks     Feedback[]
-  username      String
-  role          Roles           @default(USER)
-  RefreshTokens RefreshTokens[]
-  Project       Project[]
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  email     String     @unique
+  password  String
+  feedbacks Feedback[]
+  username  String
+  role      Roles      @default(USER)
+  Project   Project[]
 }

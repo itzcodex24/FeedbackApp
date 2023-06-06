@@ -23,8 +23,8 @@ const MyFeedbacks: React.FC = () => {
       });
   }, []);
   return (
-    <MotionPage className="w-full flex bg-secondary flex-col ">
-      <div className="w-full px-4 flex items-center flex-col mb-10 ">
+    <MotionPage className="w-full flex bg-secondary flex-col h-screen">
+      <div className="w-full px-4 flex items-center flex-col mb-10 h-full">
         <div className="w-full flex items-center justify-center mt-2 mb-10">
           <Link
             to="/projects/create"

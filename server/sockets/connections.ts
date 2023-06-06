@@ -13,6 +13,11 @@ const connectionsHandler = (io: Server) => {
       socket.join("register");
     });
 
+    socket.on("joinProject", (id) => {
+      console.log(`👂 ${socket.id} is listening for project ${id}`);
+      socket.join(`project-${id}`);
+    });
+
     socket.on("disconnect", () => {
       console.log(`😢 ${socket.id} disconnected`);
       clients.splice(clients.indexOf(socket.id), 1);

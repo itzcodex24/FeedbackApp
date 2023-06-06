@@ -1,8 +1,6 @@
 import Button from "./Button";
 import Navbar from "./Navbar";
 import Feedback from "./Feedback";
-import FeedbackContainer from "./FeedbackContainer";
-import FeedbackForm from "./FeedbackForm";
 import MotionPage from "./MotionPage";
 import Project from "./Project";
 
@@ -10,14 +8,4 @@ import Project from "./Project";
 import Profile from "./Settings/Profile";
 import Account from "./Settings/Account";
 
-export {
-  Button,
-  Navbar,
-  Feedback,
-  FeedbackContainer,
-  FeedbackForm,
-  Profile,
-  Account,
-  MotionPage,
-  Project,
-};
+export { Button, Navbar, Feedback, Profile, Account, MotionPage, Project };
