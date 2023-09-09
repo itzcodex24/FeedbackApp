@@ -14,6 +14,7 @@ This is a Full Stack App, built to learn JWT server sessions as well as practise
 To run this project, you will need to add the following environment variables to your server `.env` file
 
 `DATABASE_URL` : MongoDB connection string
+
 `ACCESS_TOKEN_SECRET` : JWT Token Secret 
 
 
