@@ -63,12 +63,6 @@ If you have any feedback, please reach out to me on my [portfolio website]('http
 
 TypeScript, Express, React, Prisma
 
-## Gallery
-
-<img width="1512" alt="image" src="https://github.com/itzcodex24/FeedbackApp/assets/70026038/3c2fceb9-3997-4a6f-a3c9-2f7d0edd5ece">
-
-
-
 ## Contributing
 
 Contributions are always welcome!
